@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  display: grid;
+  place-items: center;
+  /* background-color: red; */
+}
+#game-canvas {
+  position: relative;
+  width: 600px;
+  height: 500px;
+  border: 1px solid black;
+  box-sizing: content-box;
+}
