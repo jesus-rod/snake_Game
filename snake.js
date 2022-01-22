@@ -8,7 +8,7 @@ const canvasHeight = 500;
 
 const pixelSize = 10;
 
-//  1 x 10 = 10
+let foodPosition = null;
 
 const initCanvas = () => {
   for (i = 0; i * pixelSize < canvasHeight; i++) {
@@ -67,6 +67,25 @@ const drawSnakePiece = (coord) => {
   canvas.appendChild(snakePiece);
 };
 
+const checkIfFoodFound = (headPosition) => {
+  const isHeadOnFood = headPosition.every(
+    (value, index) => value == foodPosition[index]
+  );
+  if (isHeadOnFood) {
+    makeFoodAppear();
+    const headNextPos = calculateHeadNextPosition();
+    snakeCoords.push(headNextPos);
+    drawSnakePiece(headNextPos);
+  }
+};
+
+const calculateHeadNextPosition = () => {
+  const [headX, headY] = snakeCoords[snakeCoords.length - 1];
+  const [directionX, directionY] = currentDirection;
+  const headNextPos = [headX + directionX, headY + directionY];
+  return headNextPos;
+};
+
 const moveSnake = () => {
   // remove beginning of snake
   // add piece in the direction going
@@ -77,13 +96,50 @@ const moveSnake = () => {
     // remove tail piece from DOM
     removeSnakePieceFromDOM(tail);
 
-    const [headX, headY] = snakeCoords[snakeCoords.length - 1];
-    const [directionX, directionY] = currentDirection;
-    const headNextPos = [headX + directionX, headY + directionY];
+    const headNextPos = calculateHeadNextPosition();
     snakeCoords.push(headNextPos);
-
     drawSnakePiece(headNextPos);
+
+    checkIfFoodFound(headNextPos);
   }, 100);
+};
+
+const renderFood = (foodCoord) => {
+  const [x, y] = foodCoord;
+  const foodContainer = document.createElement('div');
+  foodContainer.id = 'food';
+  foodContainer.style.position = 'absolute';
+  foodContainer.style.top = x * pixelSize + 'px';
+  foodContainer.style.left = y * pixelSize + 'px';
+  foodContainer.style.width = '10px';
+  foodContainer.style.height = '10px';
+  foodContainer.style.borderRadius = '50%';
+  foodContainer.style.backgroundColor = 'tomato';
+  canvas.appendChild(foodContainer);
+};
+
+const makeRandomPos = () => {
+  const randomRow = Math.floor(Math.random(ROWS) * ROWS);
+  const randomCol = Math.floor(Math.random(COLS) * COLS);
+  return [randomRow, randomCol];
+};
+
+const updateFoodPosition = (newPosition) => {
+  foodPosition = newPosition;
+};
+
+const removeFoodIfNeeded = () => {
+  const foodContainer = document.getElementById('food');
+  if (foodContainer) {
+    foodContainer.remove();
+  }
+};
+
+const makeFoodAppear = () => {
+  removeFoodIfNeeded();
+  const randomPos = makeRandomPos();
+  updateFoodPosition(randomPos);
+  renderFood(randomPos);
 };
 
 const listenKeyboardInput = () => {
@@ -121,3 +177,4 @@ initCanvas();
 initSnake();
 moveSnake();
 listenKeyboardInput();
+makeFoodAppear();
